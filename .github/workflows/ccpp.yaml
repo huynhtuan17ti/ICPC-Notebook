@@ -1,0 +1,19 @@
+name: notebook compile
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install pdflatex
+      run: sudo apt-get install texlive-latex-base texlive-latex-recommended texlive-latex-extra
+    - name: Install notebook-generator tool
+      run: sudo npm install -g notebook-generator
+    - name: Build notebook
+      run: notebook-generator ./content/ --output doc/hcmus.pdf --author "HCMUS-IdentityImbalance"
