@@ -11,7 +11,7 @@ HCMUS-IdentityImbalance ICPC Notebook
 #### Build notebook
 ```
     cd ICPC-Notebook
-    notebook-generator ./content/ --output doc/hcmus.pdf
+    notebook-generator ./content/ --output doc/hcmus.pdf --author "HCMUS-IdentityImbalance"
 ```
 
 ## References
