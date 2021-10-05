@@ -6,14 +6,14 @@ HCMUS-IdentityImbalance ICPC Notebook
 ```
     git clone https://github.com/pin3da/notebook-generator
     cd notebook-generator
-    sudo apt install install texlive texlive-latex-extra
+    sudo apt install texlive texlive-latex-extra
     sudo npm install -g notebook-generator
 ```
 
 #### Build notebook
 ```
     cd ICPC-Notebook
-    notebook-generator ./content --output hcmus.pdf
+    notebook-generator ./content/ --output doc/hcmus.pdf
 ```
 
 ## References
