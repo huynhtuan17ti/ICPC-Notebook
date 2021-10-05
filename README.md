@@ -10,6 +10,7 @@ HCMUS-IdentityImbalance ICPC Notebook
 
 #### Build notebook
 ```
+    git clone https://github.com/huynhtuan17ti/ICPC-Notebook
     cd ICPC-Notebook
     notebook-generator ./content/ --output doc/hcmus.pdf --author "HCMUS-IdentityImbalance"
 ```
