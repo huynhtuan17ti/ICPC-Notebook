@@ -1,5 +1,5 @@
 using namespace std;
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 #define D(x) cout<<x<<endl;
 
 typedef int T;
@@ -11,8 +11,6 @@ struct node{
 };
 
 struct splay_tree{
-
-
   node *root;
 
   void right_rot(node *x) {

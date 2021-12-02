@@ -1,7 +1,8 @@
-/**
+/*
  * Micro hash table, can be used as a set.
  *   Very efficient vs std::set
- * */
+ * 
+ */
 
 const int MN = 1001;
 struct ht {

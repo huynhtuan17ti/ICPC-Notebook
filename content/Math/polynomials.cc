@@ -1,6 +1,7 @@
+// TODO: what's this ?
 const double pi = acos(-1);
 struct poly {
-  deque<double> coef;
+  deque <double> coef;
   double x_lo, x_hi;
 
   double evaluate(double x) {

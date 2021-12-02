@@ -1,7 +1,5 @@
 // both tries can be tested with the problem: http://codeforces.com/problemset/problem/916/D
 
-
-
 // Persistent binary trie (BST for integers)
 const int MD = 31;
 

@@ -1,4 +1,4 @@
-/**
+/*
 The function SOD(n) (sum of divisors) is defined
 as the summation of all the actual divisors of
 an integer number n. For example,
