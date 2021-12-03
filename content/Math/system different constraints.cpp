@@ -12,11 +12,7 @@ If the graph has negative cycle, there's no solution.
 Else, create a virtual vertex s, add edge with weight 0 from s to every x_i, 
 the solution is the shortest path from s to n vertices.
 */
-
-#include <vector>
-#include <iostream>
 typedef long long ll;
-using namespace std;
 
 struct edge{
     int u, v, c;
@@ -65,12 +61,4 @@ void solve(int n, int m){
     if(bellman_ford(n, edges))
         cout << "Unreliable" << '\n';
     else cout << "Reliable" << '\n';
-}
-
-int main(){
-    int n, m; 
-    while(cin >> n >> m){
-        solve(n, m);
-    }
-    
 }

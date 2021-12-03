@@ -1,62 +1,67 @@
-/**
- * O (n log^2 (n))
- * See http://web.stanford.edu/class/cs97si/suffix-array.pdf for reference
- * */
-
-struct entry{
-  int a, b, p;
-  entry(){}
-  entry(int x, int y, int z): a(x), b(y), p(z){}
-  bool operator < (const entry &o) const {
-    return (a == o.a) ? (b == o.b) ? ( p < o.p) : (b < o.b) : (a < o.a);
-  }
-};
-
-struct SuffixArray{
-  const int N;
-  string s;
-  vector<vector<int> > P;
-  vector<entry> M;
-
-  SuffixArray(const string &s) : N(s.length()) , s(s), P(1, vector<int> (N, 0)), M(N) {
-    for (int i = 0; i < N; ++i)
-      P[0][i] = (int) s[i];
-
-    for (int skip = 1, level = 1; skip < N; skip *= 2, level++) {
-      P.push_back(vector<int>(N, 0));
-      for (int i = 0 ; i < N; ++i) {
-        int next = ((i + skip) < N) ? P[level - 1][i + skip] : -10000;
-        M[i] = entry(P[level - 1][i], next, i);
-      }
-      sort(M.begin(), M.end());
-      for (int i = 0; i < N; ++i)
-        P[level][M[i].p] =  (i > 0 and M[i].a == M[i - 1].a and M[i].b == M[i - 1].b) ? P[level][M[i - 1].p] : i;
+const int MAXN = 200005;
+ 
+const int MAX_DIGIT = 256;
+void countingSort(vector<int>& SA, vector<int>& RA, int k = 0) {
+    int n = SA.size();
+    vector<int> cnt(max(MAX_DIGIT, n), 0);
+    for (int i = 0; i < n; i++)
+        if (i + k < n)
+            cnt[RA[i + k]]++;
+        else
+            cnt[0]++;
+    for (int i = 1; i < cnt.size(); i++)
+        cnt[i] += cnt[i - 1];
+    vector<int> tempSA(n);
+    for (int i = n - 1; i >= 0; i--)
+        if (SA[i] + k < n)
+            tempSA[--cnt[RA[SA[i] + k]]] = SA[i];
+        else
+            tempSA[--cnt[0]] = SA[i];
+    SA = tempSA;
+}
+ 
+vector <int> constructSA(string s) {
+    int n = s.length();
+    vector <int> SA(n);
+    vector <int> RA(n);
+    vector <int> tempRA(n);
+    for (int i = 0; i < n; i++) {
+        RA[i] = s[i];
+        SA[i] = i;
     }
-  }
-
-  vector<int> getSuffixArray(){
-    vector<int> &rank = P.back();
-    vector<pair<int, int> > inv(rank.size());
-    for (int i = 0; i < rank.size(); ++i)
-      inv[i] = make_pair(rank[i], i);
-    sort(inv.begin(), inv.end());
-    vector<int> sa(rank.size());
-    for (int i = 0; i < rank.size(); ++i)
-      sa[i] = inv[i].second;
-    return sa;
-  }
-
-  // returns the length of the longest common prefix of s[i...L-1] and s[j...L-1]
-  int lcp(int i, int j) {
-    int len = 0;
-    if (i == j) return N - i;
-    for (int k = P.size() - 1; k >= 0 && i < N && j < N; --k) {
-      if (P[k][i] == P[k][j]) {
-        i += 1 << k;
-        j += 1 << k;
-        len += 1 << k;
-      }
+    for (int step = 1; step < n; step <<= 1) {
+        countingSort(SA, RA, step);
+        countingSort(SA, RA, 0);
+        int c = 0;
+        tempRA[SA[0]] = c;
+        for (int i = 1; i < n; i++) {
+            if (RA[SA[i]] == RA[SA[i - 1]] && RA[SA[i] + step] == RA[SA[i - 1] + step])
+                    tempRA[SA[i]] = tempRA[SA[i - 1]];
+            else
+                tempRA[SA[i]] = tempRA[SA[i - 1]] + 1;
+        }
+        RA = tempRA;
+        if (RA[SA[n - 1]] == n - 1) break;
     }
-    return len;
-  }
-};
+    return SA;
+}
+ 
+vector<int> computeLCP(const string& s, const vector<int>& SA) {
+    int n = SA.size();
+    vector<int> LCP(n), PLCP(n), c(n, 0);
+    for (int i = 0; i < n; i++)
+        c[SA[i]] = i;
+    int k = 0;
+    for (int j, i = 0; i < n-1; i++) {
+        if(c[i] - 1 < 0)
+            continue;
+        j = SA[c[i] - 1];
+        k = max(k - 1, 0);
+        while (i+k < n && j+k < n && s[i + k] == s[j + k])
+            k++;
+        PLCP[i] = k;
+    }
+    for (int i = 0; i < n; i++)
+        LCP[i] = PLCP[SA[i]];
+    return LCP;
+}
