@@ -1,214 +1,179 @@
-const int N = 1e5 + 5;
-const int LG = log2(N) + 1;
-
-int n, tim = 0;
-int a[N], level[N], tin[N], tout[N], rtin[N], nxt[N], subtree[N], parent[LG][N];
-vector<int> g[N];
-
-//Heavy Light Decomposition
-
-void dfs(int u, int par, int lvl)
-{
-  parent[0][u] = par;
-  level[u] = lvl;
-  for (auto &it : g[u])
-  {
-    if (it == par)
-      continue;
-    dfs(it, u, lvl + 1);
-  }
-}
-
-void dfs1(int u, int par)
-{
-  subtree[u] = 1;
-  for (auto &it : g[u])
-  {
-    if (it == par)
-      continue;
-    dfs1(it, u);
-    subtree[u] += subtree[it];
-    if (subtree[it] > subtree[g[u][0]])
-      swap(it, g[u][0]);
-  }
-}
-
-void dfs_hld(int u, int par)
-{
-  tin[u] = ++tim;
-  rtin[tim] = u;
-  for (auto &v : g[u])
-  {
-    if (v == par)
-      continue;
-    nxt[v] = (v == g[u][0] ? nxt[u] : v);
-    dfs_hld(v, u);
-  }
-  tout[u] = tim;
-}
-
-//LCA
-
-int walk(int u, int h)
-{
-  for (int i = LG - 1; i >= 0; i--)
-  {
-    if ((h >> i) & 1)
-      u = parent[i][u];
-  }
-  return u;
-}
-
-void precompute()
-{
-  for (int i = 1; i < LG; i++)
-    for (int j = 1; j <= n; j++)
-      if (parent[i - 1][j])
-        parent[i][j] = parent[i - 1][parent[i - 1][j]];
-}
-
-int LCA(int u, int v)
-{
-  if (level[u] < level[v])
-    swap(u, v);
-  int diff = level[u] - level[v];
-  for (int i = LG - 1; i >= 0; i--)
-  {
-    if ((1 << i) & diff)
-    {
-      u = parent[i][u];
+#include <bits/stdc++.h>
+using namespace std;
+using pii = pair<int, int>;
+using pll = pair<int64_t, int64_t>;
+using ld = long double;
+ 
+#define long int64_t
+#define all(c) c.begin(), c.end()
+#define fastio ios_base::sync_with_stdio(false); cin.tie(0)
+ 
+template <class T> inline void chmin(T &a, const T& val) { if (a > val) a = val; }
+template <class T> inline void chmax(T &a, const T& val) { if (a < val) a = val; }
+template <class T> long sqr(T a) { return 1ll * a * a; }
+template <class T> void compress(T &a) { sort(all(a)); a.resize(unique(all(a)) - a.begin()); }
+template <class T> T power(T x, long n){
+    T res = 1;
+    for (; n; x *= x, n >>= 1){
+        if (n & 1) res *= x;
     }
-  }
-  if (u == v)
-    return u;
-  for (int i = LG - 1; i >= 0; i--)
-  {
-    if (parent[i][u] && parent[i][u] != parent[i][v])
-    {
-      u = parent[i][u];
-      v = parent[i][v];
+    return res;
+}
+ 
+const double pi = acos(-1.00);
+const double eps = 1e-6;
+const int INF = 2e9;
+const int MOD = 1e9 + 7;
+const int dx[4] = {0, 0, -1, 1};
+const int dy[4] = {-1, 1, 0, 0};
+ 
+struct SegmentTree {
+#define m ((l + r) >> 1)
+#define lc (i << 1)
+#define rc (i << 1 | 1)
+    vector<int> mx;
+    int n;
+ 
+    SegmentTree(int n = 0) : n(n){    
+        mx.resize(4 * n + 1, -INF);
     }
-  }
-  return parent[0][u];
+ 
+    SegmentTree(const vector<int> &a) : n(a.size()) {
+        mx.resize(4 * n + 1, 0);
+        function<void(int, int, int)> build = [&](int i, int l, int r){
+            if (l == r){
+                mx[i] = a[l - 1];
+                return;
+            }
+            build(lc, l, m); build(rc, m + 1, r);
+            mx[i] = max(mx[lc], mx[rc]);
+        };
+        build(1, 1, n);
+    }
+ 
+    void update(int i, int l, int r, int p, int val){
+        if (l == r){
+            mx[i] = val;
+            return;
+        }  
+        if (p <= m) update(lc, l, m, p, val); 
+        else update(rc, m + 1, r, p, val);
+        mx[i] = max(mx[lc], mx[rc]);
+    }
+ 
+    int get(int i, int l, int r, int u, int v){
+        if (v < l || r < u) return -INF;
+        if (u <= l && r <= v) return mx[i];
+        return max(get(lc, l, m, u, v), get(rc, m + 1, r, u, v));
+    }
+ 
+    void update(int p, int val){
+        update(1, 1, n, p, val);
+    }
+ 
+    int get(int l, int r){
+        return get(1, 1, n, l, r);
+    }
+#undef m
+#undef lc
+#undef rc  
+};
+ 
+// source: https://g...content-available-to-author-only...b.com/bqi343/USACO/blob/master/Implementations/content/graphs%20(12)/Trees%20(10)/HLD%20(10.3).h
+template<bool VALS_IN_EDGS = false> struct HeavyLight{
+    int n, ti;
+    vector<vector<int>> adj;
+    vector<int> par, pos, head, dep, sz;
+    SegmentTree tree;
+ 
+    HeavyLight(int n = 0) : n(n), ti(0), tree(n) {    
+        par.resize(n + 1); pos.resize(n + 1); sz.resize(n + 1);
+        adj.resize(n + 1); head.resize(n + 1); dep.resize(n + 1);
+    }
+ 
+    void addEdge(int u, int v){
+        adj[u].push_back(v); adj[v].push_back(u);
+    }
+ 
+    void dfsSz(int u){
+        sz[u] = 1;
+        for (int &v : adj[u]){
+            par[v] = u; dep[v] = dep[u] + 1;
+            adj[v].erase(find(all(adj[v]), u)); // remove parent
+            dfsSz(v); 
+            sz[u] += sz[v];
+            if (sz[v] > sz[adj[u][0]]) swap(v, adj[u][0]);  
+        }
+    }
+ 
+    void dfsHLD(int u){
+        pos[u] = ++ti;
+        for (int v : adj[u]){
+            head[v] = (v == adj[u][0] ? head[u] : v);
+            dfsHLD(v);
+        }
+    }
+ 
+    void init(int root = 1){
+        head[root] = root;
+        dfsSz(root); dfsHLD(root);
+    }
+ 
+    int lca(int u, int v){
+        for (; head[u] != head[v]; v = par[head[v]]){
+            if (dep[head[u]] > dep[head[v]]) swap(u, v);
+        }
+        return (dep[u] < dep[v] ? u : v);
+    }
+ 
+    template<class OP> void processPath(int u, int v, OP op){
+        for (; head[u] != head[v]; v = par[head[v]]){
+            if (dep[head[u]] > dep[head[v]]) swap(u, v);
+            op(pos[head[v]], pos[v]);
+        }
+        if (dep[u] > dep[v]) swap(u, v);
+        op(pos[u] + VALS_IN_EDGS, pos[v]);
+    }
+ 
+    void update(int u, int x){
+        tree.update(pos[u], x);
+    }
+ 
+    int queryPath(int u, int v){
+        int ans = -INF;
+        processPath(u, v, [this, &ans](int l, int r){
+            chmax(ans, tree.get(l, r));
+        });
+        return ans;
+    }
+};
+ 
+void solve(){
+    int n, q; cin >> n >> q;
+    HeavyLight hld(n);
+    vector<int> val(n);
+    for (int &x : val) cin >> x;
+    for (int i = 1; i < n; i++){
+        int u, v; cin >> u >> v;
+        hld.addEdge(u, v);
+    }
+    hld.init(1);
+    for (int i = 0; i < n; i++){
+        hld.update(i + 1, val[i]);
+    }
+    while (q--){
+        int op, x, y; cin >> op >> x >> y;
+        if (op == 1) hld.update(x, y);
+        else cout << hld.queryPath(x, y) << ' ';
+    }
 }
-
-int dist(int u, int v)
+ 
+int main()
 {
-  return level[u] + level[v] - 2 * level[LCA(u, v)];
-}
-
-//Segment Tree
-
-int st[4 * N], lazy[4 * N];
-
-void build(int node, int L, int R)
-{
-  if (L == R)
-  {
-    st[node] = a[rtin[L]];
-    return;
-  }
-  int M = (L + R) / 2;
-  build(node * 2, L, M);
-  build(node * 2 + 1, M + 1, R);
-  st[node] = min(st[node * 2], st[node * 2 + 1]);
-}
-
-void propagate(int node, int L, int R)
-{
-  if (L != R)
-  {
-    lazy[node * 2] += lazy[node];
-    lazy[node * 2 + 1] += lazy[node];
-  }
-  st[node] += lazy[node];
-  lazy[node] = 0;
-}
-
-int query(int node, int L, int R, int i, int j)
-{
-  if (lazy[node])
-    propagate(node, L, R);
-  if (j < L || i > R)
-    return 1e9;
-  if (i <= L && R <= j)
-    return st[node];
-  int M = (L + R) / 2;
-  int left = query(node * 2, L, M, i, j);
-  int right = query(node * 2 + 1, M + 1, R, i, j);
-  return min(left, right);
-}
-
-void update(int node, int L, int R, int i, int j, int val)
-{
-  if (lazy[node])
-    propagate(node, L, R);
-  if (j < L || i > R)
-    return;
-  if (i <= L && R <= j)
-  {
-    lazy[node] += val;
-    propagate(node, L, R);
-    return;
-  }
-  int M = (L + R) / 2;
-  update(node * 2, L, M, i, j, val);
-  update(node * 2 + 1, M + 1, R, i, j, val);
-  st[node] = min(st[node * 2], st[node * 2 + 1]);
-}
-
-void upd(int l, int r, int val)
-{
-  update(1, 1, n, l, r, val);
-}
-
-int get(int l, int r)
-{
-  return query(1, 1, n, l, r);
-}
-//Utility Functions
-
-int query_up(int x, int y) //Assuming Y is an ancestor of X
-{
-  int res = 0;
-  while (nxt[x] != nxt[y])
-  {
-    res += get(tin[nxt[x]], tin[x]);
-    x = parent[0][nxt[x]];
-  }
-  res += get(tin[y] + 1, tin[x]); //use tin[y] to include Y
-  return res;
-}
-
-int query_hld(int x, int y)
-{
-  int lca = LCA(x, y);
-  int res = query_up(x, lca) + query_up(y, lca);
-  return res;
-}
-
-void update_up(int x, int y, int val) //Assuming Y is an ancestor of X
-{
-  while (nxt[x] != nxt[y])
-  {
-    upd(tin[nxt[x]], tin[x], val);
-    x = parent[0][nxt[x]];
-  }
-  upd(tin[y] + 1, tin[x], val); //use tin[y] to include Y
-}
-
-void update_hld(int x, int y, int val)
-{
-  int lca = LCA(x, y);
-  update_up(x, lca, val);
-  update_up(y, lca, val);
-}
-
-void hld()
-{
-  dfs(1, 0, 1);
-  dfs1(1, 0);
-  dfs_hld(1, 0);
-  precompute();
-  build(1, 1, n);
+    fastio;
+    int T = 1; //cin >> T;
+    while (T--){
+        solve();
+    }
+    return 0;
 }

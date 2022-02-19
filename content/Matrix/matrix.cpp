@@ -1,46 +1,38 @@
-const int MN  = 111;
-const int mod = 10000;
+const int dim = 10;
 
-struct matrix {
-  int r, c;
-  int m[MN][MN];
-
-  matrix (int _r, int _c) : r (_r), c (_c) {
-    memset(m, 0, sizeof m);
-  }
-
-  void print() {
-    for (int i = 0; i < r; ++i) {
-      for (int j = 0; j < c; ++j)
-        cout << m[i][j] << " ";
-      cout << endl;
+struct matrix{
+    vector <vector<long long>> a;
+    matrix(){
+        a.resize(dim);
+        for(int i = 1; i < dim; i++)
+            a[i].resize(dim, 0);
     }
-  }
-
-  int x[MN][MN];
-  matrix & operator *= (const matrix &o) {
-    memset(x, 0, sizeof x);
-    for (int i = 0; i < r; ++i)
-      for (int k = 0; k < c; ++k)
-        if (m[i][k] != 0)
-          for (int j = 0; j < c; ++j) {
-            x[i][j] = (x[i][j] +  ((m[i][k] * o.m[k][j]) % mod) ) % mod;
-          }
-    memcpy(m, x, sizeof(m));
-    return *this;
-  }
 };
 
-void matrix_pow(matrix b, long long e, matrix &res) {
-  memset(res.m, 0, sizeof res.m);
-  for (int i = 0; i < b.r; ++i)
-    res.m[i][i] = 1;
-
-  if (e == 0) return;
-  while (true) {
-    if (e & 1) res *= b;
-    if ((e >>= 1) == 0) break;
-    b *= b;
-  }
+matrix Identity(){
+    matrix A;
+    for(int i = 1; i < dim; i++)
+        A.a[i][i] = 1;
+    return A;
 }
 
+matrix operator* (const matrix &A, const matrix &B){
+    matrix mul;
+    for(int k = 1; k < dim; k++)
+        for(int i = 1; i < dim; i++)
+            for(int j = 1; j < dim; j++)
+                mul.a[i][j] += A.a[i][k]*B.a[k][j];
+    return mul;
+}
+
+matrix fastPow(matrix A, long long b){
+    if(b == 0)
+        return Identity();
+    if(b == 1)
+        return A;
+    matrix t = fastPow(A, b/2);
+    t = t*t;
+    if(b%2 == 1)
+        t = t*A;
+    return t;
+}
