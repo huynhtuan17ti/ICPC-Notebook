@@ -35,7 +35,6 @@ int update(int cur, int l, int r, int pos, int val){
             ver[next].rnode = update(ver[cur].rnode , mid+1, r, pos, val);
     }
     ver[next].sum = ver[ver[next].lnode].sum + ver[ver[next].rnode].sum;
-    //cout << l << ' ' << r << ' ' << ver[next].sum << '\n';
     return next;
 }
 

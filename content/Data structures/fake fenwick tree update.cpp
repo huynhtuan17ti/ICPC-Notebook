@@ -29,7 +29,6 @@ int get(int x, int y){
 }
 
 int main(){
-    _io
     int n; cin >> n;
     vector <int> Sx, Sy;
     for(int i = 1; i <= n; i++){
@@ -37,8 +36,8 @@ int main(){
         Sx.pb(a[i].fi);
         Sy.pb(a[i].se);
     }
-    unique_arr(Sx);
-    unique_arr(Sy);
+    compress(Sx);
+    compress(Sy);
     // unique all value
     for(int i = 1; i <= n; i++){
         a[i].fi = lower_bound(Sx.begin(), Sx.end(), a[i].fi) - Sx.begin();

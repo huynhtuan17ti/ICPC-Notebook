@@ -1,4 +1,3 @@
-
 template <typename T, typename func = function<T(const T, const T)>>
 struct SparseTable {
     func calc;
