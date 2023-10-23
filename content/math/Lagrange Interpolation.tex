@@ -1,0 +1,9 @@
+Given few real values $x_1, x_2, x_3, \dots, x_n$ and $y_1, y_2, y_3, \dots, y_n$ and there will be a polynomial $P$ 
+with real coefficients satisfying the conditions $P(x_i) = y_i$, $\forall i = {1, 2, 3, \dots, n}$ 
+and degree of polynomial $P$ must be less than the count of real values i.e., $degree(P) < n$.
+
+\begin{aligned}
+    \quad f(x) = & \frac{\left(x-x_1\right)\left(x-x_2\right) \ldots\left(x-x_n\right)}{\left(x_0-x_1\right)\left(x_0-x_2\right) \ldots\left(x_0-x_n\right)} \times y_0 + \\
+    & \frac{\left(x-x_0\right)\left(x-x_2\right) \ldots\left(x-x_n\right)}{\left(x_1-x_0\right)\left(x_1-x_2\right) \ldots\left(x_1-x_n\right)} \times y_1+\ldots+ \\
+    & \frac{\left(x-x_0\right)\left(x-x_1\right) \ldots\left(x-x_n-1\right)}{\left(x_n-x_0\right)\left(x_n-x_1\right) \ldots\left(x_n-x_n-1\right)} \times y_n
+\end{aligned}

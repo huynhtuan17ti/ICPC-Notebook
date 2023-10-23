@@ -1,0 +1,48 @@
+\subsubsection{Nim}
+\textbf{Game description}
+
+There are several piles, each with several stones.
+In a move a player can take any positive number of stones from any one pile and throw them away.
+A player loses if they can't make a move, which happens when all the piles are empty.
+
+The game state is unambiguously described by a multiset of positive integers.
+A move consists of strictly decreasing a chosen integer (if it becomes zero, it is removed from the set).
+
+
+\textbf{Solution}
+The solution by Charles L. Bouton looks like this:
+
+The current player has a winning strategy if and only if the xor-sum of the pile sizes is non-zero.
+The xor-sum of a sequence $a$ is $a_1 \oplus a_2 \oplus \ldots \oplus  a_n$, where $\oplus$ is the *bitwise exclusive or*.
+
+\subsubsection{Sprague-Grundy theorem}
+Let's consider a state $v$ of a two-player impartial game and let $v_i$ be the states reachable from it (where $i \in \{ 1, 2, \dots, k \} , k \ge 0$).
+To this state, we can assign a fully equivalent game of Nim with one pile of size $x$.
+The number $x$ is called the Grundy value or nim-value of state $v$.
+
+Moreover, this number can be found in the following recursive way:
+
+$$ x = \text{mex}\ \{ x_1, \ldots, x_k \}, $$
+
+where $x_i$ is the Grundy value for state $v_i$ and the function $\text{mex}$ (*minimum excludant*) is the smallest non-negative integer not found in the given set.
+
+Viewing the game as a graph, we can gradually calculate the Grundy values starting from vertices without outgoing edges.
+Grundy value being equal to zero means a state is losing.
+
+\subsubsection{Application of the theorem}
+Finally, we describe an algorithm to determine the win/loss outcome of a game, which is applicable to any impartial two-player game.
+
+To calculate the Grundy value of a given state you need to:
+
+\begin{itemize}
+    \item Get all possible transitions from this state
+    \item Each transition can lead to a \textbf{sum of independent games} (one game in the degenerate case).
+    Calculate the Grundy value for each independent game and xor-sum them.
+    Of course xor does nothing if there is just one game.
+    \item After we calculated Grundy values for each transition we find the state's value as the $\text{mex}$ of these numbers.
+    \item If the value is zero, then the current state is losing, otherwise it is winning.
+\end{itemize}
+
+In comparison to the previous section, we take into account the fact that there can be transitions to combined games.
+We consider them a Nim with pile sizes equal to the independent games' Grundy values.
+We can xor-sum them just like usual Nim according to Bouton's theorem.

@@ -8,7 +8,7 @@ HCMUS-IdentityImbalance ICPC Notebook
     sudo npm install -g notebook-generator
 ```
 
-#### Install and build notebook
+### Install and build notebook
 ```bash
     git clone https://github.com/huynhtuan17ti/ICPC-Notebook
     cd ICPC-Notebook
